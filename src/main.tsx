@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./app";
-import "./index.css";
 
 async function enableMocking() {
   const { worker } = await import("./mocks/browser");
@@ -11,8 +10,12 @@ async function enableMocking() {
   });
 }
 
+const root = document.getElementById("root");
+
+if (!root) throw new Error("missing #root element in index.html");
+
 enableMocking().then(() => {
-  ReactDOM.createRoot(document.getElementById("root")!).render(
+  ReactDOM.createRoot(root).render(
     <React.StrictMode>
       <App />
     </React.StrictMode>

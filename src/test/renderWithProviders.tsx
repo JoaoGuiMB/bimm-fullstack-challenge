@@ -1,25 +1,32 @@
 import { ApolloProvider } from "@apollo/client";
+import { ThemeProvider } from "@mui/material";
 import { render, type RenderOptions } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
 import type { ReactElement, ReactNode } from "react";
-import { apolloClient } from "@/lib/apollo";
+import { MemoryRouter } from "react-router-dom";
+import { createApolloClient } from "@/lib/apollo";
+import { theme } from "@/lib/theme";
 
-/**
- * Renders a component inside the same providers the app uses.
- *
- * Pair this with `src/mocks/server.ts` when you want a test to exercise the
- * real Apollo client against the mock API. For unit tests of presentational
- * components, plain `render` from RTL is fine.
- */
-const Providers = ({ children }: { children: ReactNode }) => (
-  <ApolloProvider client={apolloClient}>
-    <MemoryRouter>{children}</MemoryRouter>
-  </ApolloProvider>
-);
+type RenderWithProvidersOptions = Omit<RenderOptions, "wrapper"> & {
+  route?: string;
+};
 
-export const renderWithProviders = (
+export function renderWithProviders(
   ui: ReactElement,
-  options?: Omit<RenderOptions, "wrapper">
-) => render(ui, { wrapper: Providers, ...options });
+  { route = "/", ...options }: RenderWithProvidersOptions = {}
+) {
+  const client = createApolloClient();
+
+  function Providers({ children }: { children: ReactNode }) {
+    return (
+      <ApolloProvider client={client}>
+        <ThemeProvider theme={theme}>
+          <MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>
+        </ThemeProvider>
+      </ApolloProvider>
+    );
+  }
+
+  return render(ui, { wrapper: Providers, ...options });
+}
 
 export * from "@testing-library/react";
